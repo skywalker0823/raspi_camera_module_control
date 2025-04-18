@@ -60,7 +60,10 @@ def generate_frames():
             im = cv2.cvtColor(im, cv2.COLOR_RGBA2RGB)
         elif len(im.shape) == 2:  # 如果是灰階圖像
             im = cv2.cvtColor(im, cv2.COLOR_GRAY2RGB)
-            
+        
+        #顏色輸出錯誤處理
+        im = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
+
         # 直接在這裡旋轉圖像
         im = cv2.rotate(im, cv2.ROTATE_180)
         
