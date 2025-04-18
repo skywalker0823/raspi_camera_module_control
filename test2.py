@@ -54,6 +54,12 @@ def generate_frames():
         # 捕獲圖像
         im = picam2.capture_array()
         
+        # 確保圖像是RGB格式
+        if im.shape[-1] == 4:  # 如果是RGBA格式
+            im = cv2.cvtColor(im, cv2.COLOR_RGBA2RGB)
+        elif len(im.shape) == 2:  # 如果是灰階圖像
+            im = cv2.cvtColor(im, cv2.COLOR_GRAY2RGB)
+            
         # 執行 YOLO 物件識別
         results = model(im)
         

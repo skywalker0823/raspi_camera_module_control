@@ -3,3 +3,7 @@ picamera2>=0.3.12
 ultralytics>=8.0.0
 opencv-python>=4.8.0
 numpy>=1.22.0
+# python-prctl 需要先安裝系統依賴
+# 在安裝 requirements.txt 之前，請先執行：
+# sudo apt-get update
+# sudo apt-get install -y libcap-dev
