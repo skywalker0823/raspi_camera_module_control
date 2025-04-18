@@ -30,6 +30,9 @@ except Exception as e:
     print(f"相機初始化失敗: {e}")
     exit(1)
 
+# 新增全局變數控制方向
+is_flipped = False
+
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html>
@@ -37,19 +40,47 @@ HTML_TEMPLATE = """
     <title>Pi Camera Stream with Object Detection</title>
     <style>
         .container { text-align: center; }
-        .stream { max-width: 100%; }
+        .stream { max-width: 100%; transition: transform 0.3s; }
+        .stream.flipped { transform: rotate(180deg); }
+        .controls { margin: 20px 0; }
+        .btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn:hover { background-color: #45a049; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Pi Camera Live Stream with YOLO Detection</h1>
-        <img class="stream" src="{{ url_for('video_feed') }}" />
+        <div class="controls">
+            <button class="btn" onclick="toggleFlip()">翻轉畫面</button>
+        </div>
+        <img class="stream" id="videoFeed" src="{{ url_for('video_feed') }}" />
     </div>
+    <script>
+        let isFlipped = false;
+        function toggleFlip() {
+            const video = document.getElementById('videoFeed');
+            isFlipped = !isFlipped;
+            if (isFlipped) {
+                video.classList.add('flipped');
+            } else {
+                video.classList.remove('flipped');
+            }
+            fetch('/toggle_flip');
+        }
+    </script>
 </body>
 </html>
 """
 
 def generate_frames():
+    global is_flipped
     while True:
         # 捕獲圖像
         im = picam2.capture_array()
@@ -59,6 +90,10 @@ def generate_frames():
             im = cv2.cvtColor(im, cv2.COLOR_RGBA2RGB)
         elif len(im.shape) == 2:  # 如果是灰階圖像
             im = cv2.cvtColor(im, cv2.COLOR_GRAY2RGB)
+        
+        # 根據設定翻轉圖像
+        if is_flipped:
+            im = cv2.rotate(im, cv2.ROTATE_180)
             
         # 執行 YOLO 物件識別
         results = model(im)
@@ -94,6 +129,12 @@ def index():
 def video_feed():
     return Response(generate_frames(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/toggle_flip')
+def toggle_flip():
+    global is_flipped
+    is_flipped = not is_flipped
+    return 'OK'
 
 if __name__ == '__main__':
     try:
