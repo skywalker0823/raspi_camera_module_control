@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, Response
+from flask import Flask, render_template, jsonify, Response, send_from_directory
 from picamera2 import Picamera2
 from datetime import datetime
 import os
@@ -40,6 +40,10 @@ def list_videos():
     videos = [f for f in os.listdir(RESULTS_FOLDER) if f.endswith('.mp4')]
     videos.sort(reverse=True)  # 最新的影片排在前面
     return jsonify(videos)
+
+@app.route('/video/<filename>')
+def serve_video(filename):
+    return send_from_directory(RESULTS_FOLDER, filename)
 
 if __name__ == '__main__':
     try:

@@ -35,6 +35,20 @@
             padding: 10px;
             border-radius: 4px;
         }
+        .video-player {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+        .video-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .video-item:hover {
+            background-color: #f5f5f5;
+        }
     </style>
 </head>
 <body>
@@ -42,9 +56,16 @@
         <h1>樹莓派相機控制面板</h1>
         <button class="button" onclick="startRecording()">開始錄影</button>
         <div id="status" class="status"></div>
+        
+        <div class="video-player">
+            <video id="videoPlayer" width="100%" controls style="display: none;">
+                您的瀏覽器不支援 HTML5 影片播放。
+            </video>
+        </div>
+
         <div class="video-list">
             <h2>錄製的影片</h2>
-            <ul id="videoList"></ul>
+            <div id="videoList"></div>
         </div>
     </div>
 
@@ -66,6 +87,13 @@
                 });
         }
 
+        function playVideo(filename) {
+            const videoPlayer = document.getElementById('videoPlayer');
+            videoPlayer.style.display = 'block';
+            videoPlayer.src = `/video/${filename}`;
+            videoPlayer.play();
+        }
+
         function updateVideoList() {
             fetch('/videos')
                 .then(response => response.json())
@@ -73,9 +101,13 @@
                     const videoList = document.getElementById('videoList');
                     videoList.innerHTML = '';
                     videos.forEach(video => {
-                        const li = document.createElement('li');
-                        li.textContent = video;
-                        videoList.appendChild(li);
+                        const videoItem = document.createElement('div');
+                        videoItem.className = 'video-item';
+                        videoItem.innerHTML = `
+                            <span style="flex-grow: 1;">${video}</span>
+                            <button class="button" onclick="playVideo('${video}')" style="margin-left: 10px;">播放</button>
+                        `;
+                        videoList.appendChild(videoItem);
                     });
                 });
         }
