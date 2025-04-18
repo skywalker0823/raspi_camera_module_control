@@ -1,38 +1,86 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Pi Camera Control</title>
+    <title>樹莓派相機控制</title>
     <style>
-        .video-container { margin: 20px 0; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .video-list {
+            margin-top: 20px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 4px;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
-    <button onclick="startRecording()">開始錄影</button>
-    <div id="videoList" class="video-container"></div>
+    <div class="container">
+        <h1>樹莓派相機控制面板</h1>
+        <button class="button" onclick="startRecording()">開始錄影</button>
+        <div id="status" class="status"></div>
+        <div class="video-list">
+            <h2>錄製的影片</h2>
+            <ul id="videoList"></ul>
+        </div>
+    </div>
 
     <script>
-        async function startRecording() {
-            const response = await fetch('/record');
-            const data = await response.json();
-            if (data.status === 'success') {
-                updateVideoList();
-            }
+        function startRecording() {
+            document.getElementById('status').innerHTML = '錄影中...';
+            fetch('/record')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.getElementById('status').innerHTML = '錄影完成！';
+                        updateVideoList();
+                    } else {
+                        document.getElementById('status').innerHTML = '錄影失敗：' + data.message;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('status').innerHTML = '發生錯誤：' + error;
+                });
         }
 
-        async function updateVideoList() {
-            const response = await fetch('/videos');
-            const videos = await response.json();
-            const videoList = document.getElementById('videoList');
-            videoList.innerHTML = videos.map(video => `
-                <div>
-                    <video width="320" height="240" controls>
-                        <source src="/results/${video}" type="video/mp4">
-                    </video>
-                    <div>${video}</div>
-                </div>
-            `).join('');
+        function updateVideoList() {
+            fetch('/videos')
+                .then(response => response.json())
+                .then(videos => {
+                    const videoList = document.getElementById('videoList');
+                    videoList.innerHTML = '';
+                    videos.forEach(video => {
+                        const li = document.createElement('li');
+                        li.textContent = video;
+                        videoList.appendChild(li);
+                    });
+                });
         }
 
+        // 頁面載入時更新影片列表
         updateVideoList();
     </script>
 </body>
