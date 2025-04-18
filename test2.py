@@ -25,8 +25,7 @@ try:
     picam2 = Picamera2()
     config = picam2.create_video_configuration(main={"size": (640, 480)})
     picam2.configure(config)
-    # 設定相機轉向
-    picam2.set_controls({"Rotate": 180})  # 180度旋轉
+    # 移除不支援的 Rotate 控制
     picam2.start()
 except Exception as e:
     print(f"相機初始化失敗: {e}")
@@ -62,6 +61,9 @@ def generate_frames():
         elif len(im.shape) == 2:  # 如果是灰階圖像
             im = cv2.cvtColor(im, cv2.COLOR_GRAY2RGB)
             
+        # 直接在這裡旋轉圖像
+        im = cv2.rotate(im, cv2.ROTATE_180)
+        
         # 執行 YOLO 物件識別
         results = model(im)
         
