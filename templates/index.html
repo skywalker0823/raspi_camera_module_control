@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>樹莓派相機控制</title>
+    <style>
+        body { text-align: center; padding: 20px; }
+        button { 
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>樹莓派相機控制面板</h1>
+    <button onclick="controlCamera('capture')">拍照</button>
+    <button onclick="controlCamera('record')">錄影</button>
+    <div id="result"></div>
+
+    <script>
+        function controlCamera(action) {
+            fetch(`/${action}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('result').innerHTML = 
+                        `操作成功！檔案名稱：${data.filename}`;
+                })
+                .catch(error => {
+                    document.getElementById('result').innerHTML = 
+                        '發生錯誤：' + error;
+                });
+        }
+    </script>
+</body>
+</html>
